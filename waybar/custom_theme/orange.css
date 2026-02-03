@@ -1,3 +1,4 @@
+/* Font and Base */
 * {
   font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", sans-serif;
   font-size: 12px;
@@ -5,25 +6,28 @@
   min-height: 0;
 }
 
-/* Global module spacing */
+/* Module container spacing */
 #waybar > box > * {
-  margin-left: 6px;
-  margin-right: 6px;
+  margin: 0 6px;
 }
 
-/* Waybar Base */
+/* Base Waybar Window */
 window#waybar {
-  background: rgba(27, 30, 43, 0.88); /* Dark navy with transparency */
-  border: 2px solid #ff6a00; /* Flame orange border */
+  background: rgba(27, 30, 43, 0.88); /* Semi-transparent dark */
+  border: 2px solid #ff6a00;
   border-radius: 10px;
   padding: 4px 8px;
-  color: #dadada; /* Light text */
+  color: #dadada;
   margin: 4px;
   animation: fadeIn 0.5s ease-in-out forwards;
   opacity: 0;
 }
 
-/* Workspaces */
+/* Workspaces styling */
+#workspaces {
+  margin: 0 6px;
+}
+
 #workspaces button {
   background: transparent;
   color: #a0a8b8;
@@ -43,7 +47,7 @@ window#waybar {
   color: #1b1e2b;
 }
 
-/* Module base styling */
+/* Generic Module Styling */
 #clock,
 #battery,
 #network,
@@ -61,14 +65,14 @@ window#waybar {
 #custom-public_ip {
   background: rgba(20, 20, 30, 0.8);
   padding: 5px 10px;
-  margin: 3px;
+  margin: 3px 6px;
   border-radius: 6px;
   color: #eeffff;
-  transition: all 0.2s ease;
   border: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
-/* Hover effect */
+/* Hover Effect */
 #clock:hover,
 #battery:hover,
 #network:hover,
@@ -88,6 +92,14 @@ window#waybar {
   border: 1px solid #ffb045;
 }
 
+/* Tray styling */
+#tray {
+  background: rgba(20, 20, 30, 0.85);
+  border-radius: 6px;
+  padding: 3px 5px;
+  margin: 3px 6px;
+}
+
 /* Battery states */
 #battery.charging {
   color: #c3e88d;
@@ -99,24 +111,17 @@ window#waybar {
   color: #f07178;
 }
 
-/* Network */
+/* Network states */
 #network.disconnected {
   color: #f07178;
 }
 
-/* Pulseaudio muted */
+/* Audio muted */
 #pulseaudio.muted {
   color: #7d8ea3;
 }
 
-/* Tray */
-#tray {
-  background: rgba(20, 20, 30, 0.85);
-  border-radius: 6px;
-  padding: 3px 5px;
-}
-
-/* Animation */
+/* Fade animation */
 @keyframes fadeIn {
   from {
     opacity: 0;

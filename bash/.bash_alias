@@ -64,7 +64,7 @@ alias gpl="git pull"
 alias lg="lazygit"
 # ------ audio ------
 
-alias ac="alsamixer"
+alias ac="pulsemixer"
 
 # ------ ssh ------
 
@@ -106,10 +106,7 @@ alias dbuild='docker build -t'
 alias drun='docker run --rm -it'
 
 
-# Temp Scripts
+# Rust Language
 
-
-alias f='python formater.py'
-alias r='python reorder.py'
-alias rr='rm -f final.csv output.csv && : > input.txt && : > order.txt'
-
+alias rb='cargo build'
+alias rc='cargo run'

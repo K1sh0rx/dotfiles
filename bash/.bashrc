@@ -42,6 +42,7 @@ export PATH="$HOME/.wasmtime/bin:$PATH"
 if ! type _zoxide_init >/dev/null 2>&1; then
     export _ZO_DOCTOR=0
     eval "$(zoxide init bash)"
+    export _ZO_MATCH_MODE="exact"
 fi
 
 # ------------------------- PROMPT / SHELL ---------------------------#
@@ -50,8 +51,6 @@ eval "$(starship init bash)"
 PS1='[\u@\h \W]\$ '
 
 # ------------------------- TOOLS / PLUGINS --------------------------#
-# GitHub Copilot CLI
-eval "$(github-copilot-cli alias -- bash)"
 
 # ------------------------- ALIASES ----------------------------------#
 [ -f ~/.bash_alias ] && source ~/.bash_alias

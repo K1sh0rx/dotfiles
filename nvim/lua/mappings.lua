@@ -9,6 +9,7 @@ local map = vim.keymap.set
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 map("n", "f", require("flash").jump, { desc = "Flash jump" })
+map('t', '<C-q>', '<C-\\><C-n>', { desc = "Exit terminal mode to Normal mode" })
 
 -- Add split mappings
 map("n", "<leader>sv", "<cmd>vsplit<CR>", { desc = "Vertical Split" })

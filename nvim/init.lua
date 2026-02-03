@@ -32,6 +32,13 @@ dofile(vim.g.base46_cache .. "statusline")
 require "options"
 require "autocmds"
 
+-- Auto-format Rust files on save using LSP (rust-analyzer + rustfmt)
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.rs",
+    callback = function()
+        vim.lsp.buf.format({ async = false })
+    end,
+})
 vim.schedule(function()
   require "mappings"
 end)

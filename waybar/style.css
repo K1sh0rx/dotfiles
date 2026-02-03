@@ -1,4 +1,3 @@
-/* Font and Base */
 * {
   font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", sans-serif;
   font-size: 12px;
@@ -6,56 +5,49 @@
   min-height: 0;
 }
 
-/* Module container spacing */
+/* Ensure consistent spacing between all modules */
 #waybar > box > * {
-  margin: 0 6px;
+  margin-left: 6px;
+  margin-right: 6px;
 }
 
-/* Base Waybar Window */
+/* Waybar Background */
 window#waybar {
-  background: rgba(27, 30, 43, 0.88); /* Semi-transparent dark */
-  border: 2px solid #ff6a00;
-  border-radius: 10px;
-  padding: 4px 8px;
-  color: #dadada;
-  margin: 4px;
-  animation: fadeIn 0.5s ease-in-out forwards;
+  background: rgba(0, 0, 0, 0.85); /* Dark black with transparency */
+  border: 2px solid #ffffff; /* White border */
+  color: #ffffff; /* White text */
+  padding: 3px;
+  border-radius: 8px;
+  margin: 2px;
   opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
 }
 
-/* Workspaces styling */
-#workspaces {
-  margin: 0 6px;
-}
-
+/* Workspaces */
 #workspaces button {
   background: transparent;
-  color: #a0a8b8;
-  padding: 5px 8px;
-  margin: 2px;
+  color: #cccccc; /* Light gray */
+  padding: 3px 6px;
+  margin: 1px;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease-in-out;
 }
 
 #workspaces button.active {
-  background: #ff6a00;
-  color: #1b1e2b;
+  background: #ffffff;
+  color: #000000; /* Black text on white */
 }
 
-#workspaces button:hover {
-  background: #ffb045;
-  color: #1b1e2b;
-}
-
-/* Generic Module Styling */
+/* Modules */
 #clock,
 #battery,
 #network,
+#tray,
 #pulseaudio,
 #bluetooth,
-#tray,
-#memory,
 #custom-cpu,
+#ram,
+#memory,
 #custom-gpu,
 #custom-fan,
 #custom-ip,
@@ -63,23 +55,22 @@ window#waybar {
 #custom-updates,
 #custom-disk,
 #custom-public_ip {
-  background: rgba(20, 20, 30, 0.8);
-  padding: 5px 10px;
-  margin: 3px 6px;
+  padding: 3px 8px;
+  margin: 3px;
+  background: rgba(20, 20, 20, 0.8); /* Almost black */
   border-radius: 6px;
-  color: #eeffff;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
+  color: #ffffff;
 }
 
-/* Hover Effect */
+/* Hover Effects */
+#workspaces button:hover,
 #clock:hover,
 #battery:hover,
 #network:hover,
 #pulseaudio:hover,
-#bluetooth:hover,
 #memory:hover,
 #custom-cpu:hover,
+#ram:hover,
 #custom-gpu:hover,
 #custom-fan:hover,
 #custom-ip:hover,
@@ -87,41 +78,95 @@ window#waybar {
 #custom-updates:hover,
 #custom-disk:hover,
 #custom-public_ip:hover {
-  background: #ff6a00;
-  color: #1b1e2b;
-  border: 1px solid #ffb045;
+  background: #ffffff;
+  color: #000000;
 }
 
-/* Tray styling */
-#tray {
-  background: rgba(20, 20, 30, 0.85);
-  border-radius: 6px;
-  padding: 3px 5px;
-  margin: 3px 6px;
+/* Battery Module */
+#battery {
+  color: #ffffff;
 }
 
-/* Battery states */
-#battery.charging {
-  color: #c3e88d;
-}
-#battery.warning {
-  color: #ffcb6b;
-}
+#battery.charging,
+#battery.warning,
 #battery.critical {
-  color: #f07178;
+  color: #ffffff;
 }
 
-/* Network states */
+/* Network */
+#network {
+  color: #ffffff;
+}
+
 #network.disconnected {
-  color: #f07178;
+  color: #ffffff;
 }
 
-/* Audio muted */
+/* Sound (Pulseaudio) */
+#pulseaudio {
+  color: #ffffff;
+}
+
 #pulseaudio.muted {
-  color: #7d8ea3;
+  color: #aaaaaa;
 }
 
-/* Fade animation */
+/* Bluetooth */
+#bluetooth {
+  color: #ffffff;
+}
+
+/* CPU Usage */
+#custom-cpu {
+  color: #ffffff;
+}
+
+/* RAM Usage */
+#memory {
+  color: #ffffff;
+}
+
+/* GPU Usage */
+#custom-gpu {
+  color: #ffffff;
+}
+
+/* Fan Speed */
+#custom-fan {
+  color: #ffffff;
+}
+
+/* IP */
+#custom-ip {
+  color: #ffffff;
+}
+
+/* VPN Status */
+#custom-vpn {
+  color: #ffffff;
+}
+
+/* Update Checker */
+#custom-updates {
+  color: #ffffff;
+}
+
+/* Disk Usage */
+#custom-disk {
+  color: #ffffff;
+}
+
+/* Public IP - FIXED: was #custom-publicip, now #custom-public_ip */
+#custom-public_ip {
+  color: #ffffff;
+}
+
+/* Tray */
+#tray {
+  background: rgba(20, 20, 20, 0.8);
+}
+
+/* Smooth Fade-in Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
