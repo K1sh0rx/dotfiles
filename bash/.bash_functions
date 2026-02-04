@@ -10,165 +10,217 @@
 # ──────────────────────────────────────────────────────────────
 # PYTHON VIRTUAL ENVIRONMENT MANAGER
 # ──────────────────────────────────────────────────────────────
-
 ENV_DIR="$HOME/.env"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-# Activate Virtual Environment
-av() {
-  if [[ ! -d "$ENV_DIR" ]]; then
-    echo "No environment directory found in $ENV_DIR"
-    return 1
-  fi
+pick() {
+  local prompt="$1"
 
-  ENV_LIST=$(find "$ENV_DIR" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
-  [[ -z "$ENV_LIST" ]] && echo "No virtual environments found." && return 1
-
-  SELECTED_ENV=$(echo "$ENV_LIST" | rofi -dmenu -p "Select environment:" -lines 5 -width 10)
-  [[ -z "$SELECTED_ENV" ]] && echo "No environment selected." && return 1
-
-  source "$ENV_DIR/$SELECTED_ENV/bin/activate"
-  export CURRENT_ENV="$SELECTED_ENV"
-  echo "Activated environment: $SELECTED_ENV"
-}
-
-# Deactivate Current Virtual Environment
-dv() {
-  if [[ -n "$CURRENT_ENV" ]]; then
-    deactivate
-    echo "Deactivated environment: $CURRENT_ENV"
-    unset CURRENT_ENV
+  if command -v fzf >/dev/null 2>&1; then
+    fzf --prompt="$prompt > " --height=40% --reverse
+  elif command -v rofi >/dev/null 2>&1 && [[ -n "$DISPLAY" ]]; then
+    rofi -dmenu -p "$prompt"
   else
-    echo "No environment is currently active."
+    select opt; do
+      echo "$opt"
+      break
+    done
   fi
 }
 
-# Create New Environment
+
+av() {
+  [[ ! -d "$ENV_DIR" ]] && echo "No env dir: $ENV_DIR" && return 1
+
+  mapfile -t ENV_LIST < <(find "$ENV_DIR" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
+  [[ ${#ENV_LIST[@]} -eq 0 ]] && echo "No environments found." && return 1
+
+  SELECTED_ENV=$(printf "%s\n" "${ENV_LIST[@]}" | pick "Activate env")
+  [[ -z "$SELECTED_ENV" ]] && return 1
+
+  [[ -n "$VIRTUAL_ENV" ]] && deactivate
+  source "$ENV_DIR/$SELECTED_ENV/bin/activate"
+  echo "Activated: $SELECTED_ENV"
+}
+
+dv() {
+  [[ -n "$VIRTUAL_ENV" ]] && deactivate && echo "Deactivated." || echo "No env active."
+}
+
 cenv() {
-  NEW_ENV=$(rofi -dmenu -p "Enter new environment name:" -lines 0 -width 10)
+  local NEW_ENV
+
+  read -rp "New environment name: " NEW_ENV
   [[ -z "$NEW_ENV" ]] && echo "No name entered." && return 1
 
   mkdir -p "$ENV_DIR"
   [[ -d "$ENV_DIR/$NEW_ENV" ]] && echo "Environment '$NEW_ENV' already exists." && return 1
 
-  python -m venv "$ENV_DIR/$NEW_ENV"
-  echo "Created new environment: $NEW_ENV"
+  "$PYTHON_BIN" -m venv "$ENV_DIR/$NEW_ENV"
+  echo "Created environment: $NEW_ENV"
 }
 
-# Delete Existing Environment
 denv() {
-  [[ ! -d "$ENV_DIR" ]] && echo "No environment directory found." && return 1
-  ENV_LIST=$(find "$ENV_DIR" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
-  [[ -z "$ENV_LIST" ]] && echo "No environments found." && return 1
+  [[ ! -d "$ENV_DIR" ]] && echo "No env dir." && return 1
 
-  SELECTED_ENV=$(echo "$ENV_LIST" | rofi -dmenu -p "Select environment to delete:" -lines 5 -width 10)
-  [[ -z "$SELECTED_ENV" ]] && echo "No selection made." && return 1
+  mapfile -t ENV_LIST < <(find "$ENV_DIR" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort)
+  [[ ${#ENV_LIST[@]} -eq 0 ]] && echo "No envs found." && return 1
 
-  CONFIRM=$(echo -e "Yes\nNo" | rofi -dmenu -p "Delete $SELECTED_ENV?")
+  SELECTED_ENV=$(printf "%s\n" "${ENV_LIST[@]}" | pick "Delete env")
+  [[ -z "$SELECTED_ENV" ]] && return 1
+
+  CONFIRM=$(printf "No\nYes" | pick "Delete $SELECTED_ENV?")
   [[ "$CONFIRM" != "Yes" ]] && echo "Cancelled." && return 1
 
   rm -rf "$ENV_DIR/$SELECTED_ENV"
-  echo "Deleted environment: $SELECTED_ENV"
+  echo "Deleted: $SELECTED_ENV"
 }
 
-# ──────────────────────────────────────────────────────────────
-# ASUS PROFILE MANAGER
-# ──────────────────────────────────────────────────────────────
-pm() {
-  CURRENT_MODE=$(asusctl profile -p | awk -F 'is ' '{print $2}')
-  MODES="Quiet\nBalanced\nPerformance"
-  echo "Current Mode: $CURRENT_MODE"
-  SELECTED_MODE=$(printf "$MODES" | rofi -dmenu -p "Select Mode:")
-  [[ -z "$SELECTED_MODE" ]] && echo "No mode selected." && return
+# --------------------------------------------------
+# Add AppImage
+# --------------------------------------------------
 
-  asusctl profile --profile-set "$SELECTED_MODE"
-  echo "Switched to: $SELECTED_MODE"
-}
+APPIMAGE_BASE="$HOME/.appimage"
+DESKTOP_DIR="$HOME/.local/share/applications"
 
-# ──────────────────────────────────────────────────────────────
-# APPIMAGE INSTALLER & REMOVER
-# ──────────────────────────────────────────────────────────────
 addimage() {
   [[ $# -ne 1 ]] && echo "Usage: addimage <AppImage path>" && return 1
-  APPIMAGE_PATH="$(realpath "$1")"
-  [[ ! -f "$APPIMAGE_PATH" ]] && echo "File does not exist: $APPIMAGE_PATH" && return 1
+
+  local SRC APPIMAGE_PATH APPIMAGE_NAME FOLDER_NAME INSTALL_DIR
+  SRC="$1"
+  APPIMAGE_PATH="$(realpath "$SRC" 2>/dev/null)"
+  [[ ! -f "$APPIMAGE_PATH" ]] && echo "File not found: $SRC" && return 1
+
+  # Basic validation
+  file "$APPIMAGE_PATH" | grep -qi appimage || {
+    echo "Not a valid AppImage."
+    return 1
+  }
 
   APPIMAGE_NAME="$(basename "$APPIMAGE_PATH")"
   FOLDER_NAME="${APPIMAGE_NAME%.AppImage}"
-  INSTALL_DIR="$HOME/.appimage/$FOLDER_NAME"
-  DESKTOP_DIR="$HOME/.local/share/applications"
+  INSTALL_DIR="$APPIMAGE_BASE/$FOLDER_NAME"
+
   mkdir -p "$INSTALL_DIR" "$DESKTOP_DIR"
 
-  read -p "App Name: " CUSTOM_NAME
+  read -rp "App Name: " CUSTOM_NAME
   [[ -z "$CUSTOM_NAME" ]] && echo "Name cannot be empty." && return 1
 
-  read -p "Icon Path (.png/.svg/.jpg) [optional]: " CUSTOM_ICON_PATH
-  APPIMAGE_DEST="$INSTALL_DIR/$APPIMAGE_NAME"
-  DESKTOP_FILE="$DESKTOP_DIR/${CUSTOM_NAME// /_}.desktop"
-  ICON_DEST="$INSTALL_DIR/icon.png"
+  read -rp "Icon path (optional): " CUSTOM_ICON
+  local APPIMAGE_DEST="$INSTALL_DIR/$APPIMAGE_NAME"
+  local ICON_DEST="$INSTALL_DIR/icon.png"
+  local DESKTOP_FILE="$DESKTOP_DIR/$FOLDER_NAME.desktop"
 
   echo "Installing $APPIMAGE_NAME..."
-  cp "$APPIMAGE_PATH" "$APPIMAGE_DEST" && chmod +x "$APPIMAGE_DEST"
+  cp "$APPIMAGE_PATH" "$APPIMAGE_DEST" || return 1
+  chmod +x "$APPIMAGE_DEST"
 
-  if [[ -n "$CUSTOM_ICON_PATH" && -f "$CUSTOM_ICON_PATH" ]]; then
-    cp "$CUSTOM_ICON_PATH" "$ICON_DEST"
-    ICON_LINE="Icon=$ICON_DEST"
+  # ------------------------------------------------
+  # Icon handling
+  # ------------------------------------------------
+  if [[ -n "$CUSTOM_ICON" && -f "$CUSTOM_ICON" ]]; then
+    cp "$CUSTOM_ICON" "$ICON_DEST"
   else
     echo "Extracting icon..."
-    cd "$INSTALL_DIR" && "$APPIMAGE_DEST" --appimage-extract &>/dev/null
-    FOUND_ICON=$(find squashfs-root -type f \( -iname '*.png' -o -iname '*.svg' -o -iname '*.jpg' \) | grep -i icon | head -n 1)
+    (
+      cd "$INSTALL_DIR" || exit 1
+      "$APPIMAGE_DEST" --appimage-extract &>/dev/null
+    )
+
+    FOUND_ICON=$(find "$INSTALL_DIR/squashfs-root" \
+      \( -path '*256x256*' -o -path '*128x128*' -o -iname '*icon*' \) \
+      \( -iname '*.png' -o -iname '*.svg' -o -iname '*.jpg' \) \
+      | head -n 1)
+
     if [[ -n "$FOUND_ICON" ]]; then
       cp "$FOUND_ICON" "$ICON_DEST"
-      ICON_LINE="Icon=$ICON_DEST"
-    else
-      ICON_LINE="Icon=application-default-icon"
     fi
-    rm -rf squashfs-root
+
+    rm -rf "$INSTALL_DIR/squashfs-root"
   fi
 
+  local ICON_LINE="Icon=${ICON_DEST:-application-default-icon}"
+
+  # ------------------------------------------------
+  # Desktop entry
+  # ------------------------------------------------
   cat >"$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Type=Application
 Name=$CUSTOM_NAME
-Exec=$APPIMAGE_DEST
+Exec="$APPIMAGE_DEST"
 $ICON_LINE
 Comment=Installed via addimage
 Terminal=false
 Categories=Utility;
 EOF
+
   chmod +x "$DESKTOP_FILE"
-  echo "'$CUSTOM_NAME' added to your launcher."
+  echo "✔ '$CUSTOM_NAME' added to launcher."
 }
 
+# --------------------------------------------------
+# Remove AppImage
+# --------------------------------------------------
 removeimage() {
-  DESKTOP_DIR="$HOME/.local/share/applications"
-  APP_DIR="$HOME/.appimage"
+  [[ ! -d "$DESKTOP_DIR" ]] && echo "No desktop directory found." && return 1
 
+  local ENTRIES
   ENTRIES=$(grep -l "Installed via addimage" "$DESKTOP_DIR"/*.desktop 2>/dev/null \
-            | xargs -n1 basename | sed 's/\.desktop$//')
+    | xargs -n1 basename | sed 's/\.desktop$//')
+
   [[ -z "$ENTRIES" ]] && echo "No addimage apps found." && return 1
 
-  SELECTED=$(echo "$ENTRIES" | rofi -dmenu -p "Select app to remove:" -lines 5)
+  local SELECTED
+  SELECTED=$(printf "%s\n" "$ENTRIES" | pick "Remove AppImage")
   [[ -z "$SELECTED" ]] && echo "Cancelled." && return 1
 
-  DESKTOP_FILE="$DESKTOP_DIR/$SELECTED.desktop"
-  INSTALL_PATH=$(awk -F '=' '/Exec=/{print $2}' "$DESKTOP_FILE" | xargs dirname)
+  local DESKTOP_FILE="$DESKTOP_DIR/$SELECTED.desktop"
+  [[ ! -f "$DESKTOP_FILE" ]] && echo "Desktop file missing." && return 1
 
-  CONFIRM=$(echo -e "Yes\nNo" | rofi -dmenu -p "Delete $SELECTED?")
+  local INSTALL_PATH
+  INSTALL_PATH=$(awk -F= '/^Exec=/{print $2}' "$DESKTOP_FILE" | sed 's/^"//;s/"$//' | xargs dirname)
+
+  [[ "$INSTALL_PATH" != "$APPIMAGE_BASE/"* ]] && {
+    echo "Refusing to delete outside $APPIMAGE_BASE"
+    return 1
+  }
+
+  local CONFIRM
+  CONFIRM=$(printf "No\nYes" | pick "Delete $SELECTED?")
   [[ "$CONFIRM" != "Yes" ]] && echo "Cancelled." && return 1
 
   rm -rf "$INSTALL_PATH" "$DESKTOP_FILE"
-  echo "'$SELECTED' removed."
+  echo "✔ '$SELECTED' removed."
 }
 
 # ──────────────────────────────────────────────────────────────
 # QUICK SERVE (PYTHON HTTP)
 # ──────────────────────────────────────────────────────────────
 serve() {
-  local dir=${1:-$(pwd)}
-  local port=${2:-2210}
+  local dir="${1:-$(pwd)}"
+  local port="${2:-2210}"
+  local bind="${BIND_ADDR:-0.0.0.0}"
+  local PYTHON_BIN="${PYTHON_BIN:-python3}"
+
   [[ ! -d "$dir" ]] && echo "Directory not found: $dir" && return 1
-  echo "Serving $dir at http://localhost:$port"
-  (cd "$dir" && python3 -m http.server "$port")
+
+  if ss -ltn | awk '{print $4}' | grep -q ":$port$"; then
+    echo "Port $port already in use"
+    return 1
+  fi
+
+  local ip
+  ip=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
+  ip=${ip:-localhost}
+
+  echo "Serving $dir"
+  echo "→ http://$ip:$port"
+
+  (
+    cd "$dir" || exit 1
+    "$PYTHON_BIN" -m http.server "$port" --bind "$bind"
+  )
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -176,9 +228,21 @@ serve() {
 # ──────────────────────────────────────────────────────────────
 h() {
   history -a
+
   local cmd
-  cmd=$(history | tail -n 200 | tac | awk '{$1=""; print substr($0,2)}' | fzf --reverse --height 50%)
-  [[ -n "$cmd" ]] && eval "$cmd"
+  cmd=$(history | awk '{$1=""; print substr($0,2)}' \
+    | tac \
+    | awk '!seen[$0]++' \
+    | fzf --reverse --height=50% \
+          --prompt="History > " \
+          --preview 'echo {}')
+
+  [[ -z "$cmd" ]] && return
+
+  read -rp "Run command? [y/N] " confirm
+  [[ "$confirm" =~ ^[Yy]$ ]] || return
+
+  fc -s "$cmd"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -242,49 +306,72 @@ tl() {
   echo -e "${GRAY}─────────────────────────────────────────────────${RESET}"
 }
 
-cdd() {
-    local INCLUDE_HIDDEN="^\.config$|^\.local$" dir session_name
-    local SEARCH_BASE="$HOME"
+# ──────────────────────────────────────────────────────────────
+# Change directory
+# ──────────────────────────────────────────────────────────────
 
-    if command -v fd >/dev/null 2>&1; then
-        dir=$(fd --type d --hidden --max-depth 3 . "$SEARCH_BASE" 2>/dev/null \
-            | grep -E "($INCLUDE_HIDDEN)|^[^\.]" \
-            | fzf --prompt="Choose directory: " \
-                  --preview='exa --tree -L 1 --color=always {} 2>/dev/null' \
-                  --preview-window=right:50%)
-    else
-        dir=$(find "$SEARCH_BASE" -type d 2>/dev/null \
-            | sed "s|^$SEARCH_BASE/||" \
-            | grep -E "($INCLUDE_HIDDEN)|^[^\.]" \
-            | fzf --prompt="Choose directory: " \
-                  --preview='exa --tree -L 1 --color=always {} 2>/dev/null' \
-                  --preview-window=right:50%)
-    fi
 
-    [[ -z "$dir" ]] && return
+# Always ignore these (never useful to cd into)
+CDD_EXCLUDES=(
+  ".git"
+  ".cache"
+  ".mozilla"
+  ".npm"
+  ".cargo"
+  ".rustup"
+  "node_modules"
+  "__pycache__"
+  ".local/share/Trash"
+)
 
-    cd "$dir" || return
-    echo "Moved to: $(pwd)"
-
-    read -rp "Do you want to create/attach a tmux session here? [y/N]: " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        local parts=(${PWD//\// })
-        if [ ${#parts[@]} -ge 2 ]; then
-            session_name="${parts[-2]}-${parts[-1]}"
-        else
-            session_name="${parts[-1]}"
-        fi
-
-        if tmux has-session -t "$session_name" 2>/dev/null; then
-            echo "Attaching to existing session: $session_name"
-        else
-            echo "Creating new tmux session: $session_name"
-            tmux new-session -d -s "$session_name" -c "$PWD"
-        fi
-
-        tmux attach-session -t "$session_name"
-    fi
+# Build fd exclude args
+_cdd_fd_excludes() {
+  for d in "${CDD_EXCLUDES[@]}"; do
+    printf -- "--exclude %s " "$d"
+  done
 }
+
+cdf() {
+  local dir
+  local SEARCH_BASE="$HOME"
+
+  dir=$(
+    fd --type d \
+       --max-depth 3 \
+       --hidden \
+       $(_cdd_fd_excludes) \
+       . "$SEARCH_BASE" 2>/dev/null \
+    | grep -v '/\.' \
+    | fzf --prompt="Fast cd > " \
+          --height=40% \
+          --reverse \
+          --preview='ls -p {} | head -n 20'
+  )
+
+  [[ -z "$dir" ]] && return
+  cd "$dir" || return
+}
+
+cda() {
+  local dir
+  local SEARCH_BASE="$HOME"
+
+  dir=$(
+    fd --type d \
+       --hidden \
+       $(_cdd_fd_excludes) \
+       . "$SEARCH_BASE" 2>/dev/null \
+    | fzf --prompt="Deep cd > " \
+          --height=60% \
+          --reverse \
+          --preview='ls -p {} | head -n 20'
+  )
+
+  [[ -z "$dir" ]] && return
+  cd "$dir" || return
+}
+
+
 
 # ──────────────────────────────────────────────────────────────
 # END OF SCRIPT

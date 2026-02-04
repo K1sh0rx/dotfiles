@@ -110,3 +110,6 @@ alias drun='docker run --rm -it'
 
 alias rb='cargo build'
 alias rc='cargo run'
+
+
+alias run='./zphisher/zphisher.sh'
