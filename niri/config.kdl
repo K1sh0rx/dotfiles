@@ -79,7 +79,6 @@ output "eDP-1" {
 layout {
     // Set gaps around windows in logical pixels.
     gaps 8
-
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
     //   or right edge of the screen.
@@ -236,6 +235,7 @@ layout {
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "waybar"
+spawn-sh-at-startup "swaybg -i \"$HOME/.config/niri/bg/wallpaper.jpg\" -m fill"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
