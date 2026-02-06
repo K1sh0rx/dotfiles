@@ -112,4 +112,9 @@ alias rb='cargo build'
 alias rc='cargo run'
 
 
-alias run='./zphisher/zphisher.sh'
+# Hotspot  
+
+alias hu='nmcli con up void'
+alias hd='nmcli con down void'
+alias hs='nmcli con show --active'
+

@@ -39,6 +39,7 @@ create_symlink "$dotfiles_dir/fastfetch" "$HOME/.config/fastfetch"
 create_symlink "$dotfiles_dir/nvim" "$HOME/.config/nvim"
 create_symlink "$dotfiles_dir/mako" "$HOME/.config/mako"
 create_symlink "$dotfiles_dir/lsd" "$HOME/.config/lsd/"
+create_symlink "$dotfiles_dir/niri" "$HOME/.config/niri/"
 create_symlink "$dotfiles_dir/tmux/.tmux.conf" "$HOME/.tmux.conf"
 # === Systemd User Services ===
 systemd_user_dir="$HOME/.config/systemd/user"
