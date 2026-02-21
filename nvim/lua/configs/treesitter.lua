@@ -12,6 +12,13 @@ return {
     "json",
     "html",
     "css",
+    "gomod",
+    "gosum",
+    "gowork",
+    "gotmpl",
+    "javascript",
+    "typescript",
+    "tsx",
   },
 
   highlight = {

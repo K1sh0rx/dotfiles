@@ -10,6 +10,8 @@
 # Editor
 export EDITOR=nvim
 export VISUAL=nvim
+export TERMINAL=kitty
+export XDG_TERMINAL=kitty
 
 # FZF default options
 export FZF_DEFAULT_OPTS='

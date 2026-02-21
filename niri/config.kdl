@@ -8,8 +8,9 @@ input {
     }
 
     touchpad {
-        tap
-        natural-scroll
+           off
+           // tap
+           // natural-scroll
     }
 
     mouse {
@@ -17,7 +18,6 @@ input {
 
     trackpoint {
     }
-
 
 }
 output "eDP-1" {
@@ -56,10 +56,9 @@ layout {
 }
 spawn-at-startup "waybar"
 spawn-sh-at-startup "swaybg -i \"$HOME/.config/niri/bg/wallpaper.jpg\" -m fill"
+spawn-sh-at-startup "wl-paste --type text --watch cliphist store";
+spawn-sh-at-startup "wl-paste --type text --watch notify-send Copied";
 
-
-hotkey-overlay {
-}
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
@@ -102,6 +101,13 @@ binds {
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
     XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+    XF86KbdBrightnessUp allow-when-locked=true {
+        spawn "brightnessctl" "--device=asus::kbd_backlight" "set" "+1"
+    }
+    XF86KbdBrightnessDown allow-when-locked=true {
+        spawn "brightnessctl" "--device=asus::kbd_backlight" "set" "1-"
+    }
+
     Mod+O repeat=false { toggle-overview; }
     Mod+X repeat=false { close-window; }
     Mod+Left  { focus-column-left; }
@@ -200,7 +206,8 @@ binds {
     Mod+Equal { set-column-width "+10%"; }
     Mod+Shift+Minus { set-window-height "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
-    Mod+V       { toggle-window-floating; }
+    // Mod+V       { toggle-window-floating; }
+    Mod+V { spawn-sh "cliphist list | wofi --dmenu | cliphist decode | wl-copy"; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
     Mod+W { toggle-column-tabbed-display; }
     Print { screenshot; }

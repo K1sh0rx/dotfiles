@@ -1,0 +1,10 @@
+width=600
+height=400
+location=center
+show=drun
+prompt=Clipboard
+filter_rate=100
+allow_markup=true
+no_actions=true
+term=kitty
+layer=overlay

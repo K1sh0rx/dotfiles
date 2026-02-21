@@ -12,6 +12,7 @@ return {
   { "williamboman/mason-lspconfig.nvim" },
   {
     "neovim/nvim-lspconfig",
+    lazy = false,
     config = function()
       require("configs.lspconfig")
     end,

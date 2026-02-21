@@ -50,6 +50,7 @@ alias rl="rfkill list"
 alias eb="nvim ~/.bashrc"
 alias ea="nvim ~/.bash_alias"
 alias ef="nvim ~/.bash_functions"
+alias en="nvim ~/.config/niri/config.kdl"
 
 # ------ source ------
 
