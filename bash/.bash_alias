@@ -8,7 +8,8 @@ alias cd='z'
 alias ..="cd ../.."
 alias .="cd .."
 alias f='z $(zoxide query -l | fzf)'
-alias tree="ls --tree"
+alias t="ls --tree"
+alias cat="bat"
 
 # ------ application -------
 
@@ -115,7 +116,6 @@ alias rc='cargo run'
 
 # Hotspot  
 
-alias hu='nmcli con up void'
-alias hd='nmcli con down void'
-alias hs='nmcli con show --active'
-
+alias hu='nmcli device wifi hotspot ifname wlan0 ssid void password 12345678'
+alias hd='nmcli connection down Hotspot'
+alias hs='nmcli connection show --active'

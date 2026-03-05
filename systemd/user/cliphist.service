@@ -1,0 +1,10 @@
+[Unit]
+Description=Cliphist Wayland Clipboard Manager
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/sh -c 'wl-paste --watch cliphist store'
+Restart=always
+
+[Install]
+WantedBy=default.target

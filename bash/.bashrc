@@ -59,5 +59,5 @@ PS1='[\u@\h \W]\$ '
 [ -f ~/.bash_functions ] && source ~/.bash_functions
 
 # ------------------------- FASTFETCH --------------------------------#
-ff
 
+ff

@@ -371,6 +371,25 @@ cda() {
   cd "$dir" || return
 }
 
+cdr() {
+  local dir
+
+  dir=$(
+    fd --type d \
+       --hidden \
+       --exclude '.git' \
+       --exclude 'node_modules' \
+       . . 2>/dev/null \
+    | sed 's|^\./||' \
+    | fzf --prompt="Tree cd > " \
+          --height=60% \
+          --reverse \
+          --preview='ls -p {} | head -n 20'
+  )
+
+  [[ -z "$dir" ]] && return
+  cd "$dir" || return
+}
 
 
 # ──────────────────────────────────────────────────────────────

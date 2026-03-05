@@ -56,8 +56,6 @@ layout {
 }
 spawn-at-startup "waybar"
 spawn-sh-at-startup "swaybg -i \"$HOME/.config/niri/bg/wallpaper.jpg\" -m fill"
-spawn-sh-at-startup "wl-paste --type text --watch cliphist store";
-spawn-sh-at-startup "wl-paste --type text --watch notify-send Copied";
 
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
@@ -208,7 +206,7 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
     // Mod+V       { toggle-window-floating; }
     Mod+V { spawn-sh "cliphist list | wofi --dmenu | cliphist decode | wl-copy"; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    Mod+Ctrl+V { switch-focus-between-floating-and-tiling; }
     Mod+W { toggle-column-tabbed-display; }
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
