@@ -9,7 +9,7 @@ alias ..="cd ../.."
 alias .="cd .."
 alias f='z $(zoxide query -l | fzf)'
 alias t="ls --tree"
-alias cat="bat"
+alias ccat="bat"
 
 # ------ application -------
 

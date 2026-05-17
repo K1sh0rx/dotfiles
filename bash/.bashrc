@@ -34,6 +34,7 @@ if ! command -v cargo >/dev/null 2>&1; then
 fi
 
 # Go
+export PATH=$PATH:~/go/bin
 export PATH="$PATH:$(go env GOPATH)/bin"
 
 # System PATH additions
@@ -61,3 +62,6 @@ PS1='[\u@\h \W]\$ '
 # ------------------------- FASTFETCH --------------------------------#
 
 ff
+
+# opencode
+export PATH=/home/k1sh0rx/.opencode/bin:$PATH

@@ -8,9 +8,9 @@ input {
     }
 
     touchpad {
-           off
-           // tap
-           // natural-scroll
+           // off
+           tap
+           natural-scroll
     }
 
     mouse {
@@ -56,6 +56,7 @@ layout {
 }
 spawn-at-startup "waybar"
 spawn-sh-at-startup "swaybg -i \"$HOME/.config/niri/bg/wallpaper.jpg\" -m fill"
+
 
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
